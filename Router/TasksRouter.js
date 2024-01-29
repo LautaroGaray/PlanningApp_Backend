@@ -132,6 +132,21 @@ TasksRouter.put(config.baseUrl+'Task/UpdateDescription',  async (req, res) => {
     }       
 });
 
+//Update group
+TasksRouter.put(config.baseUrl+'Task/UpdateGroup',  async (req, res) => {
+    try{
+       
+        const {id, idGroup} = req.query;              
+        let mongoAdapter = new MongoDBAdapter(config);
+        let taskDomain = new TaskDomain(mongoAdapter);        
+        let result =  await taskDomain.FindOneAndUpdate({id:id}, TasksData.collection, {idGroup:idGroup});   
+        let statusResult = result.IsSuccess?200:400               
+        res.status(statusResult).send(result)
+    }catch(err){
+        res.status(400).send(JSON.parse({Issuccess:false, Message:'Error Getting All Tasks ->'+err, Data: null}));
+    }       
+});
+
 //**  DELETE  **/
 //Delete task
 TasksRouter.delete(config.baseUrl+'Task/DeleteTask',  async (req, res) => {

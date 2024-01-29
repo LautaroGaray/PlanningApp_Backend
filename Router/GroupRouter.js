@@ -25,8 +25,7 @@ GroupRouter.get(config.baseUrl+'Group/GetAll',  async (req, res) => {
         let groupDomain = new GroupDomain(mongoAdapter);   
 
         let result = await groupDomain.Select(null, GroupData.collection);
-        let status = result.IsSuccess?200:400
-        console.log(JSON.stringify(result));
+        let status = result.IsSuccess?200:400        
         res.status(status).send(result)         
 
     }catch(err){
