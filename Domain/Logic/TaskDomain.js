@@ -70,11 +70,11 @@ export default class TaskDomain{
 
      Delete = async(options, entity)=>{
         try{
-            let result = await this.dbAdapter.Delete(options, entity);            
-            if(result.IsSuccess && result.Data){               
-                return {IsSuccess: true , Data: result.Data};
+            let result = await this.dbAdapter.Delete(options, entity);                    
+            if(result.Data){               
+                return {IsSuccess: true , Data: result.deletedCount};
             }else{
-                return {IsSuccess: false, Message: 'No Tasks data', Data: null};
+                return {IsSuccess: false, Message: 'No Tasks data'};
             }
             
         }catch(err){

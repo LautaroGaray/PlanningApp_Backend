@@ -34,6 +34,7 @@ TasksRouter.get(config.baseUrl+'Task/GetAll',  async (req, res) => {
 //Create Task
 TasksRouter.post(config.baseUrl+'Task/CreateTask', async(req,res)=>{
     try{
+        
         let mongoAdapter = new MongoDBAdapter(config);       
         let task = CreateEntity(req.body);       
 
@@ -41,16 +42,16 @@ TasksRouter.post(config.baseUrl+'Task/CreateTask', async(req,res)=>{
         if((task.name.trim() === '') || task.description.trim() === '' || task.agent.trim() ===''){
             res.status(400).send({IsSuccess:false, Message:'Name and Desciprion is required'});
             return;
-        }
-       
+        }       
+        
         //Check if exists
         let taskDomain = new TaskDomain(mongoAdapter);
         let selectResult = await taskDomain.SelectOne({name:task.name, description:task.description}, TasksData.collection);
         if(selectResult.IsSuccess){
             res.status(200).send(selectResult)
             return;
-        };       
-       
+        };              
+        
         //Assign id and create
         let idDomain = new IdDomain(mongoAdapter);
         let saveIdDomain = await idDomain.Save({Entity:'TaskCounter'},IdData.collection, { $inc: { Counter: 1 }})
@@ -117,13 +118,15 @@ TasksRouter.put(config.baseUrl+'Task/UpdateDescription',  async (req, res) => {
 });
 
 //**  DELETE  **/
-//Update priority
+//Delete task
 TasksRouter.delete(config.baseUrl+'Task/DeleteTask',  async (req, res) => {
     try{    
-        const {id} = req.query;              
+        const {id} = req.query;  
+        console.log(id);            
         let mongoAdapter = new MongoDBAdapter(config);
         let taskDomain = new TaskDomain(mongoAdapter);        
         let result =  await taskDomain.Delete({id:id}, TasksData.collection);   
+        console.log(JSON.stringify(result))
         let statusResult = result.IsSuccess?200:400               
         res.status(statusResult).send(result)
     }catch(err){

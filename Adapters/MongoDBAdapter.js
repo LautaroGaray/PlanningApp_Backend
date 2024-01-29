@@ -95,11 +95,22 @@ export default class MongoAdapter{
         }        
     }
     Delete = async(options, entity)=>{
-        if(!this.models[entity]){
-            throw new Error('La entidad no existe');
-        }
-        let result = await this.models[entity].deleteOne(options).lean();
+        try{
+            if(!this.models[entity]){
+                throw new Error('La entidad no existe');
+            }
+            let result = await this.models[entity].deleteOne(options).lean();           
+            if(result.deletedCount > 0){
+                return {IsSuccess: true , Data: result.deletedCount};
+            }else{
+                return {IsSuccess: false, Message: 'No Tasks data'};
+            }           
+            return result;
 
+        }catch(err){
+            console.log(err);
+            return {IsSuccess:false, Message:'Error deleting one adapter ->'+err};
+        }   
     }
 
     Save = async(options, entity) => {
