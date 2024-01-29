@@ -7,8 +7,7 @@ import TasksData from '../Domain/Entities/TasksData.js'
 import IdDomain from '../Domain/Logic/IdDomain.js';
 import IdData from '../Domain/Entities/IdData.js';
  //Helpers
- import DateTimeNow from '../Domain/Helpers/DateHelper.js'
- import CreateEntity from '../Domain/Helpers/TaskEntityHelper.js'
+ import EntityHelper from '../Domain/Helpers/EntityHelper.js'
 
 
 //Adapter Layer
@@ -30,13 +29,29 @@ TasksRouter.get(config.baseUrl+'Task/GetAll',  async (req, res) => {
         res.status(400).send(JSON.parse({Issuccess:false, Message:'Error Getting All Tasks ->'+err, Data: null}));
     }       
 });
+
+//Get By Group
+TasksRouter.get(config.baseUrl+'Task/GetByGroup',  async (req, res) => {
+    try{
+        const {idGroup} = req.query;
+        
+        let mongoAdapter = new MongoDBAdapter(config);
+        let taskDomain = new TaskDomain(mongoAdapter);        
+        let result =  await taskDomain.Select({idGroup:idGroup}, TasksData.collection);       
+        let status = result.IsSuccess?200:400       
+        res.status(status).send(result)
+    }catch(err){
+        res.status(400).send(JSON.parse({Issuccess:false, Message:'Error Getting Tasks by group ->'+err, Data: null}));
+    }       
+});
 //**  POST  **/
 //Create Task
 TasksRouter.post(config.baseUrl+'Task/CreateTask', async(req,res)=>{
     try{
         
-        let mongoAdapter = new MongoDBAdapter(config);       
-        let task = CreateEntity(req.body);       
+        let mongoAdapter = new MongoDBAdapter(config);   
+        let entityHelper = new EntityHelper();    
+        let task = entityHelper.CreateEntity_Task(req.body);       
 
         //Validations
         if((task.name.trim() === '') || task.description.trim() === '' || task.agent.trim() ===''){
@@ -76,7 +91,7 @@ TasksRouter.post(config.baseUrl+'Task/CreateTask', async(req,res)=>{
 //Update status
 TasksRouter.put(config.baseUrl+'Task/UpdateStatus',  async (req, res) => {
     try{
-        console.log(JSON.stringify(req.query))
+       
         const {id, status} = req.query;              
         let mongoAdapter = new MongoDBAdapter(config);
         let taskDomain = new TaskDomain(mongoAdapter);        
@@ -91,7 +106,7 @@ TasksRouter.put(config.baseUrl+'Task/UpdateStatus',  async (req, res) => {
 //Update priority
 TasksRouter.put(config.baseUrl+'Task/UpdatePriority',  async (req, res) => {
     try{
-        console.log(JSON.stringify(req.query))
+        
         const {id, priority} = req.query;              
         let mongoAdapter = new MongoDBAdapter(config);
         let taskDomain = new TaskDomain(mongoAdapter);        
@@ -121,12 +136,10 @@ TasksRouter.put(config.baseUrl+'Task/UpdateDescription',  async (req, res) => {
 //Delete task
 TasksRouter.delete(config.baseUrl+'Task/DeleteTask',  async (req, res) => {
     try{    
-        const {id} = req.query;  
-        console.log(id);            
+        const {id} = req.query;                
         let mongoAdapter = new MongoDBAdapter(config);
         let taskDomain = new TaskDomain(mongoAdapter);        
-        let result =  await taskDomain.Delete({id:id}, TasksData.collection);   
-        console.log(JSON.stringify(result))
+        let result =  await taskDomain.Delete({id:id}, TasksData.collection);           
         let statusResult = result.IsSuccess?200:400               
         res.status(statusResult).send(result)
     }catch(err){
