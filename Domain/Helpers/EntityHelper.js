@@ -46,6 +46,24 @@ class EntityHelper{
             throw new Error(err)
         }
     }  
+
+    CreateEntity_Project(obj){
+        try{
+            const {idProject, projectName, projectColor} = obj;
+
+            let entity = {
+                idProject: idProject?idProject:0,                  
+                projectName:projectName?projectName:''  ,
+                projectColor:projectColor?projectColor:'white'           
+            };       
+
+            return entity;
+            
+        }catch(err){
+            console.log(err);
+            throw new Error(err)
+        }
+    }  
 }
 
 export default EntityHelper;

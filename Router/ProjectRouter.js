@@ -8,49 +8,52 @@ import IdDomain from '../Domain/Logic/IdDomain.js';
 import IdData from '../Domain/Entities/IdData.js';
 import GroupDomain from '../Domain/Logic/GroupDomain.js';
 import GroupData from '../Domain/Entities/GroupData.js';
+import ProjectDomain from '../Domain/Logic/ProjectDomain.js';
+import ProjectData from '../Domain/Entities/ProjectData.js';
 
  //Helpers
  import EntityHelper from '../Domain/Helpers/EntityHelper.js'
 
  //Adapter Layer
 import MongoDBAdapter from '../Adapters/MongoDBAdapter.js';
+import ProjectDomain from '../Domain/Logic/ProjectDomain.js';
 
- const GroupRouter = Router();
+ const ProjectRouter = Router();
 
 //**  GET  **/
 //Get All Data
-GroupRouter.get(config.baseUrl+'Group/GetAll',  async (req, res) => {
+ProjectRouter.get(config.baseUrl+'Project/GetAll',  async (req, res) => {
     try{
         let mongoAdapter = new MongoDBAdapter(config);
-        let groupDomain = new GroupDomain(mongoAdapter);   
+        let projectDomain = new ProjectDomain(mongoAdapter);   
 
-        let result = await groupDomain.Select(null, GroupData.collection);
+        let result = await projectDomain.Select(null, ProjectData.collection);
         let status = result.IsSuccess?200:400        
         res.status(status).send(result)         
 
     }catch(err){
-        res.status(400).send(JSON.parse({Issuccess:false, Message:'Error Getting All Tasks ->'+err, Data: null}));
+        res.status(400).send(JSON.parse({Issuccess:false, Message:'Error Getting All Projects ->'+err, Data: null}));
     }       
 });
 
  //**  POST  **/
-//Create Group
-GroupRouter.post(config.baseUrl+'Group/CreateGroup', async(req,res)=>{
+//Create Project
+ProjectRouter.post(config.baseUrl+'Project/CreateProject', async(req,res)=>{
     try{
         
         let mongoAdapter = new MongoDBAdapter(config);   
         let entityHelper = new EntityHelper();    
-        let group = entityHelper.CreateEntity_Group(req.body);          
+        let project = entityHelper.CreateEntity_Project(req.body);          
 
         //Validations
-        if((group.name.trim() === '') ){            
+        if((project.projectName.trim() === '') ){            
             res.status(400).send({IsSuccess:false, Message:'Name is required'});
             return;
         }       
         
         //Check if exists
-        let groupDomain = new GroupDomain(mongoAdapter);
-        let selectResult = await groupDomain.SelectOne({name:group.name}, GroupData.collection);
+        let projectDomain = new ProjectDomain(mongoAdapter);
+        let selectResult = await projectDomain.SelectOne({projectName:project.projectName}, ProjectData.collection);
         if(selectResult.IsSuccess){
             res.status(200).send(selectResult)
             return;
@@ -58,33 +61,35 @@ GroupRouter.post(config.baseUrl+'Group/CreateGroup', async(req,res)=>{
         
         //Assign id and create
         let idDomain = new IdDomain(mongoAdapter);
-        let saveIdDomain = await idDomain.Save({Entity:'GroupCounter'},IdData.collection, { $inc: { Counter: 1 }})
+        let saveIdDomain = await idDomain.Save({Entity:'ProjectCounter'},IdData.collection, { $inc: { Counter: 1 }})
         if(!saveIdDomain.IsSuccess){
             res.status(400).send(saveIdDomain); 
             return;
         }
       
-        group.id = saveIdDomain.Data;       
+        project.idProject = saveIdDomain.Data;       
 
-        let createResult = await groupDomain.Create(group, GroupData.collection);       
+        let createResult = await projectDomain.Create(project, ProjectData.collection);
+        console.log(JSON.stringify(createResult));
         let status = createResult.IsSuccess?200:400;
         res.status(status).send(createResult);        
         
     }catch(err){
         console.log(err);
-        res.status(400).send({IsSucces:false, Message:'Error creating group -->'+err});
+        res.status(400).send({IsSucces:false, Message:'Error creating project -->'+err});
     }
       
 });
 
 //**  DELETE  **/
 //Delete group
-GroupRouter.delete(config.baseUrl+'Group/DeleteGroup',  async (req, res) => {
+ProjectRouter.delete(config.baseUrl+'Group/DeleteGroup',  async (req, res) => {
     try{
         let mongoAdapter = new MongoDBAdapter(config);
         let groupDomain = new GroupDomain(mongoAdapter); 
         const {idGroup} = req.query  
-       
+
+        console.log('starting delete')
         let result = await groupDomain.Delete({id:idGroup}, GroupData.collection);
         if(!result.IsSuccess){
             es.status(400).send(result)        
@@ -92,7 +97,7 @@ GroupRouter.delete(config.baseUrl+'Group/DeleteGroup',  async (req, res) => {
         
         let taskDomain = new TaskDomain(mongoAdapter);
         let resultTask = await taskDomain.UpdateAll({idGroup:idGroup}, TasksData.collection,  { $set: { idGroup: 0 } })
-        let status = resultTask.IsSuccess?200:400        
+           let status = resultTask.IsSuccess?200:400        
         res.status(status).send(resultTask);         
 
     }catch(err){
@@ -100,4 +105,4 @@ GroupRouter.delete(config.baseUrl+'Group/DeleteGroup',  async (req, res) => {
     }       
 });
 
-export default GroupRouter;
+export default ProjectRouter;

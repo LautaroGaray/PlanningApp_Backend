@@ -6,6 +6,7 @@ import cors from 'cors'
 //Routers
 import TasksRouter from './Router/TasksRouter.js'
 import GroupRouter from './Router/GroupRouter.js'
+import ProjectRouter from './Router/ProjectRouter.js'
 
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use(cors());
 app.use(TasksRouter);
 app.use(GroupRouter);
+app.use(ProjectRouter);
 
 app.listen(port, () => {
     console.log(`Servidor escuchando en puerto :${port}`);
