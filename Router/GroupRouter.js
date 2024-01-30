@@ -78,4 +78,29 @@ GroupRouter.post(config.baseUrl+'Group/CreateGroup', async(req,res)=>{
       
 });
 
+//**  DELETE  **/
+//Delete group
+GroupRouter.delete(config.baseUrl+'Group/DeleteGroup',  async (req, res) => {
+    try{
+        let mongoAdapter = new MongoDBAdapter(config);
+        let groupDomain = new GroupDomain(mongoAdapter); 
+        const {idGroup} = req.query  
+
+        console.log('starting delete')
+        let result = await groupDomain.Delete({id:idGroup}, GroupData.collection);
+        if(!result.IsSuccess){
+            es.status(400).send(result)        
+        } 
+        
+        let taskDomain = new TaskDomain(mongoAdapter);
+        let resultTask = await taskDomain.UpdateAll({idGroup:idGroup}, TasksData.collection,  { $set: { idGroup: 0 } })
+        console.log(JSON.stringify(resultTask));
+        let status = resultTask.IsSuccess?200:400        
+        res.status(status).send(resultTask);         
+
+    }catch(err){
+        res.status(400).send(JSON.parse({Issuccess:false, Message:'Error Getting All Tasks ->'+err, Data: null}));
+    }       
+});
+
 export default GroupRouter;

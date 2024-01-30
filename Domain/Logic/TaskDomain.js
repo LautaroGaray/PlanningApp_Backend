@@ -82,4 +82,17 @@ export default class TaskDomain{
         }
      }
 
+     UpdateAll = async(options, entity, optionsValue)=>{
+        try{
+            let result = await this.dbAdapter.UpdateAll(options, entity, optionsValue);                     
+            if(result.IsSuccess){
+                return result;
+            }else{
+                return {IsSuccess:false, Message: result.Message? result.Message:'Error find and updating task'};
+            }
+        }catch(err){
+            return {IsSuccess:false, Message:'Exception find and updating task: '+err}
+        }
+     }
+
 }

@@ -70,7 +70,8 @@ export default class GroupDomain{
 
      Delete = async(options, entity)=>{
         try{
-            let result = await this.dbAdapter.Delete(options, entity);                    
+            console.log('deleting')
+            let result = await this.dbAdapter.Delete(options, entity);                      
             if(result.Data){               
                 return {IsSuccess: true , Data: result.deletedCount};
             }else{

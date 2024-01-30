@@ -126,5 +126,22 @@ export default class MongoAdapter{
             return { IsSuccess: false, Message: 'Error saving task -->' + err };
         }
     }
+    UpdateAll = async(options, entity, optionsValue)=>{
+        if(!this.models[entity]){
+            throw new Error('La entidad no existe');
+        }
+
+        try{
+            let result = await this.models[entity].updateMany(options, optionsValue).lean();            
+            if(result){
+                return {IsSuccess:true, Data:result};
+            }else{
+                return {IsSuccess:false, Message:'Cannt update Many'}
+            }                     
+
+        }catch(err){
+            return {IsSuccess:false, Message:'Error updating many one adapter ->'+err};
+        }        
+    }
 
 }
