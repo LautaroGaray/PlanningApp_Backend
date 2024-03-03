@@ -74,7 +74,7 @@ export default class ProjectDomain{
             if(result.Data){               
                 return {IsSuccess: true , Data: result.deletedCount};
             }else{
-                return {IsSuccess: false, Message: 'No Tasks data'};
+                return {IsSuccess: false, Message: 'No Project data'};
             }
             
         }catch(err){

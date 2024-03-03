@@ -35,6 +35,34 @@ ProjectRouter.get(config.baseUrl+'Project/GetAll',  async (req, res) => {
         res.status(400).send(JSON.parse({Issuccess:false, Message:'Error Getting All Projects ->'+err, Data: null}));
     }       
 });
+//Get All Count
+ProjectRouter.get(config.baseUrl+'Project/GetGroups',  async (req, res) => {
+    try{
+        let mongoAdapter = new MongoDBAdapter(config);
+        let groupDomain = new GroupDomain(mongoAdapter); 
+        let projectDomain = new ProjectDomain(mongoAdapter);          
+       
+        const {projectName} = req.query;
+        let projectResultPersisted = true;
+
+        let projectResult = await projectDomain.Select({projectName:projectName}, ProjectData.collection);
+        if( !projectResult.IsSuccess){            
+           projectResultPersisted = false; 
+        }       
+        let id = projectResult.Data.length > 0?projectResult.Data[0].idProject:0;        
+        let result = await groupDomain.Select({idProject:id}, GroupData.collection);
+        console.log(JSON.stringify(result));
+        let status = result.IsSuccess?200:400      
+       if(!projectResultPersisted){        
+             res.status(400).send(projectResultPersisted);      
+       }else{        
+            res.status(status).send(result);
+       }          
+    }catch(err){
+        console.log(err);
+        res.status(400).send(JSON.parse({Issuccess:false, Message:'Error Getting All Projects ->'+err, Data: null}));
+    }       
+});
 
  //**  POST  **/
 //Create Project
@@ -82,26 +110,23 @@ ProjectRouter.post(config.baseUrl+'Project/CreateProject', async(req,res)=>{
 });
 
 //**  DELETE  **/
-//Delete group
-ProjectRouter.delete(config.baseUrl+'Group/DeleteGroup',  async (req, res) => {
+//Delete project
+ProjectRouter.delete(config.baseUrl+'Project/DeleteProject',  async (req, res) => {
     try{
+      
         let mongoAdapter = new MongoDBAdapter(config);
-        let groupDomain = new GroupDomain(mongoAdapter); 
-        const {idGroup} = req.query  
-
-        console.log('starting delete')
-        let result = await groupDomain.Delete({id:idGroup}, GroupData.collection);
+        let projectDomain = new ProjectDomain(mongoAdapter); 
+        const {projectName} = req.query  
+       
+        let result = await projectDomain.Delete({projectName:projectName}, ProjectData.collection);
         if(!result.IsSuccess){
-            es.status(400).send(result)        
-        } 
-        
-        let taskDomain = new TaskDomain(mongoAdapter);
-        let resultTask = await taskDomain.UpdateAll({idGroup:idGroup}, TasksData.collection,  { $set: { idGroup: 0 } })
-           let status = resultTask.IsSuccess?200:400        
-        res.status(status).send(resultTask);         
+            res.status(400).send(result)        
+        }        
+       
+        res.status(200).send(result);         
 
     }catch(err){
-        res.status(400).send(JSON.parse({Issuccess:false, Message:'Error Getting All Tasks ->'+err, Data: null}));
+        res.status(400).send(JSON.parse({Issuccess:false, Message:'Error deleting Projects ->'+err, Data: null}));
     }       
 });
 
