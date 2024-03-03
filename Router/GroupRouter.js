@@ -32,6 +32,20 @@ GroupRouter.get(config.baseUrl+'Group/GetAll',  async (req, res) => {
         res.status(400).send(JSON.parse({Issuccess:false, Message:'Error Getting All Tasks ->'+err, Data: null}));
     }       
 });
+//Get All Data without project
+GroupRouter.get(config.baseUrl+'Group/WithoutProject',  async (req, res) => {
+    try{
+        let mongoAdapter = new MongoDBAdapter(config);
+        let groupDomain = new GroupDomain(mongoAdapter);   
+
+        let result = await groupDomain.Select({idProject:0}, GroupData.collection);
+        let status = result.IsSuccess?200:400        
+        res.status(status).send(result)         
+
+    }catch(err){
+        res.status(400).send(JSON.parse({Issuccess:false, Message:'Error Getting All Tasks ->'+err, Data: null}));
+    }       
+});
 
  //**  POST  **/
 //Create Group

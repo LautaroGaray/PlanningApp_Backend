@@ -49,9 +49,9 @@ ProjectRouter.get(config.baseUrl+'Project/GetGroups',  async (req, res) => {
         if( !projectResult.IsSuccess){            
            projectResultPersisted = false; 
         }       
-        let id = projectResult.Data.length > 0?projectResult.Data[0].idProject:0;        
-        let result = await groupDomain.Select({idProject:id}, GroupData.collection);
-        console.log(JSON.stringify(result));
+        let id = projectResult.Data.length > 0?projectResult.Data[0].idProject:0; 
+             
+        let result = await groupDomain.Select({idProject:id}, GroupData.collection);      
         let status = result.IsSuccess?200:400      
        if(!projectResultPersisted){        
              res.status(400).send(projectResultPersisted);      
@@ -63,6 +63,7 @@ ProjectRouter.get(config.baseUrl+'Project/GetGroups',  async (req, res) => {
         res.status(400).send(JSON.parse({Issuccess:false, Message:'Error Getting All Projects ->'+err, Data: null}));
     }       
 });
+
 
  //**  POST  **/
 //Create Project
